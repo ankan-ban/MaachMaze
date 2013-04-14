@@ -1,0 +1,20 @@
+MaachMaze Game for Android
+ * developed by Anubha Banerjee and Ankan Banerjee
+ 
+Maach Maze is an android game. It makes use of accelerometer sensor to control the main character
+in this game which is a fish - maach means fish in bengali.
+
+Your aim is to help reach this fish to its mother through different levels of mazes . But in the way
+there are dangers in form of bigger fishes and sharks. You have to avoid them, else they bite you up
+and it is game over. Also you can eat smaller fish and grow bigger to some extent.
+
+The more fish you eat the more stars you complete the level with. The player has most fun avoiding
+the larger fishes and sharks as they chase you by calculating the proximity. Also the smaller fish try
+to avoid you and swim away.
+
+There are currently 10 levels with increasing complexity of maze and more dangers. This game can
+be run in openGL mode and also the canvas mode. In the openGL mode the water has been given
+special rippling effect through the fragment shader.
+
+You can also use touch mode to move the fish but its most fun when played with the accelerometer.
+Also the accelerometer can be calibrated to adjust the sensitivity and base tilt angle.
