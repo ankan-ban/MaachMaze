@@ -100,6 +100,7 @@ public class OpenGLRenderer extends GLSurfaceView implements Renderer, TwoDRende
     private float[] matrix = null;								// matrix for transformations
     
 	private int matrixHandle;
+	private int matrixHandleWaterEffect;
 	
 	// old stuff that we tried but no longer used
 	// private int timeUniformHandle;
@@ -170,13 +171,19 @@ public class OpenGLRenderer extends GLSurfaceView implements Renderer, TwoDRende
 		int vertexHandle = GLES20.glGetAttribLocation(normalProgram, "vPosition");	
 		int textureCoordHandle = GLES20.glGetAttribLocation(normalProgram, "vTexture");
 		
-		int textureHandle = GLES20.glGetUniformLocation(normalProgram, "uTexture");
+        // this should be same as above
+        //TODO: make it a different variable instead of relying on it being the same!
+        //int vertexHandle = GLES20.glGetAttribLocation(waterBlendEffectProgram, "vPosition");	
+        //int textureCoordHandle = GLES20.glGetAttribLocation(waterBlendEffectProgram, "vTexture");
+        
+        int textureHandle = GLES20.glGetUniformLocation(normalProgram, "uTexture");
 		
 		firstTexHandle = GLES20.glGetUniformLocation(waterBlendEffectProgram, "firstTex");
 		secondTexHandle = GLES20.glGetUniformLocation(waterBlendEffectProgram, "secondTex");
 		thirdTexHandle = GLES20.glGetUniformLocation(waterBlendEffectProgram, "sineTexture");
 		
         matrixHandle = GLES20.glGetUniformLocation(normalProgram, "MVPMatrix");     
+        matrixHandleWaterEffect = GLES20.glGetUniformLocation(waterBlendEffectProgram, "MVPMatrix");
 		
         // old stuff that we tried but not no longer used
 
@@ -492,6 +499,7 @@ public class OpenGLRenderer extends GLSurfaceView implements Renderer, TwoDRende
             "uniform float waveScale;          \n" +              
             "uniform float alpha;	           \n" +             
             "void main(){                      \n" +
+            
             "  vec2 coordX, coordY; \n" +
             
             "  coordX.y = coordY.y = 0.5; \n" +
@@ -594,6 +602,11 @@ public class OpenGLRenderer extends GLSurfaceView implements Renderer, TwoDRende
 	
 	private void drawImageCommon(int imageHandle, float x, float y, float width, float height, float angle)
 	{
+		drawImageCommon(imageHandle, x, y, width, height, angle, matrixHandle);
+	}
+	
+	private void drawImageCommon(int imageHandle, float x, float y, float width, float height, float angle, int matHandle)
+	{
 		if (imageHandle == -1)
 		{
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
@@ -620,7 +633,7 @@ public class OpenGLRenderer extends GLSurfaceView implements Renderer, TwoDRende
 		Matrix.translateM(matrix, 0, xOffset, yOffset, 0);
 		Matrix.scaleM(matrix, 0, widthScale, heightScale, 1);        
 		Matrix.rotateM(matrix, 0, -angle, 0, 0, 1);
-		GLES20.glUniformMatrix4fv(matrixHandle, 1, false, matrix, 0);
+		GLES20.glUniformMatrix4fv(matHandle, 1, false, matrix, 0);
 		
 		// trigger the draw
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);		
@@ -649,7 +662,6 @@ public class OpenGLRenderer extends GLSurfaceView implements Renderer, TwoDRende
 			float width, float height, float angle, float alpha, long currentTime, 
 			float period, float magnitude, float xScale, float yScale) {
 		
-		
 	    // set the image blend program (vertex and pixel shader)
         GLES20.glUseProgram(waterBlendEffectProgram);
 
@@ -657,11 +669,7 @@ public class OpenGLRenderer extends GLSurfaceView implements Renderer, TwoDRende
         GLES20.glUniform1f(xScaleUniformHandleWaterBlendProgram, xScale);
         GLES20.glUniform1f(yScaleUniformHandleWaterBlendProgram, yScale);        
         
-        /*
-        final float period    = 2.0f;	// time period in seconds (adjust this to make the motion slow or fast)
-        final float magnitude = 0.02f;	// magnitude of the effect
-        */
-        
+     
         // update the uniform for time
         final long periodInNs = (long) (period * 1000000000l); 
         float time = ((float) (currentTime % periodInNs)) / periodInNs;	
@@ -681,7 +689,7 @@ public class OpenGLRenderer extends GLSurfaceView implements Renderer, TwoDRende
 	    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, image.handle);
 	    GLES20.glUniform1i(secondTexHandle, 1);	    
 	    
-		// hack for start screen		
+		// hack for start screen
 	    if (xScale != 1.0f || yScale != 1.0f)
 	    {
 	    	// set addressing mode (mirror) only when we need to repeat the texture
@@ -705,7 +713,7 @@ public class OpenGLRenderer extends GLSurfaceView implements Renderer, TwoDRende
 	    GLES20.glUniform1i(firstTexHandle, 0);	    
         	    
 		
-		drawImageCommon(image1, x, y, width, height, angle);		        
+		drawImageCommon(image1, x, y, width, height, angle, matrixHandleWaterEffect);	
         
 	}	
 	
